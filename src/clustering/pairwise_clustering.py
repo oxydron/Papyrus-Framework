@@ -65,9 +65,57 @@ def center(pairs):
 
 	return list(clusters.values())
 
-def mergecenter(pairs):
+def find_center(clusters, word):
+	for center, cluster in cluster.items():
+		if word in cluster:
+			return center
+
+def merge_center(pairs):
 	assert_pairs(pairs)
 	pairs = sorted(pairs, reverse=True)
+	center = set()
+	noncenter = set()
+	clusters = dict()
+
+	for p in pairs:
+		if p.u != p.v:
+			# both u and v are new, create a cluster with u as center
+			if (p.u not in center and p.u not in noncenter) and\
+			(p.v not in center and p.v not in noncenter):
+				center.add(p.u)
+				noncenter.add(p.v)
+				clusters[p.u] = [p.u, p.v]
+
+			# when u is a cluster center and v is too, merge them
+			elif p.u in center and p.v in center:
+				clusters[p.u] += clusters[p.v]
+				del clusters[p.v]
+
+			# when both are in clusters and none are center
+			elif p.u in noncenter and v in noncenter:
+				continue
+
+			# when v is in a cluster and u is a center
+			elif p.v in noncenter and p.u in center:
+				v_center = find_center(p.v)
+				clusters[p.u] += clusters[v_center]
+				del clusters[v_center]
+
+			elif p.u in noncenter and p.v in center:
+				u_center = find_center(p.u)
+				clusters[p.v] += clusters[u_center]
+				del clusters[u_center]
+			elif p.v in center:
+				noncenter.add(p.u)
+				clusters[p.v].append(p.u)
+			elif p.u in center:
+				noncenter.add(p.v)
+				clusters[p.u].append(p.v)
+			else:
+				continue
+	
+	return list(clusters.values())	
+
 
 def assert_pairs(pairs):
 	"""
@@ -91,6 +139,7 @@ def main():
 
 	print(partition(pairs))
 	print(center(pairs))
+	print(merge_center(pairs))
 
 if __name__ == '__main__':
 	main()
