@@ -90,3 +90,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+papyrus/core/docs/doc2
+papyrus/core/docs/doc1
+*.todo
